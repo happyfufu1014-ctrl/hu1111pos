@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🧸 花 蓮 鼠 POS (Pro 修正版)</title>
+    <title>🧸 花 蓮 鼠 POS (睿第8版)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,17 +12,22 @@
         :root { --main-brown: #b0a496; --bg-cream: #fcf8f5; --accent-brown: #8c7b6c; --price-red: #d9534f; --profit-green: #6b8e23; }
         body { font-family: sans-serif; background: var(--bg-cream); margin: 0; display: flex; flex-direction: column; height: 100vh; color: #5d5246; overflow: hidden; }
         header { background: var(--main-brown); color: white; padding: 12px; text-align: center; font-size: 1.3em; font-weight: bold; flex-shrink: 0; }
-        .nav-bar { background: #e8e0d9; padding: 10px; display: flex; gap: 10px; overflow-x: auto; border-bottom: 2px solid #d1c7bc; flex-shrink: 0; align-items: center; }
+        .nav-bar { background: #e8e0d9; padding: 10px; display: flex; gap: 10px; overflow-x: auto; border-bottom: 2px solid #d1c7bc; flex-shrink: 0; align-items: center; -webkit-overflow-scrolling: touch; } /* 增加手機滑動順暢度 */
         .nav-btn { background: white; border: 1px solid #d1c7bc; padding: 8px 18px; border-radius: 20px; white-space: nowrap; cursor: pointer; font-size: 1.1em; }
-        .sync-btn { background: #ff9800; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-left: auto; }
+        .sync-btn { background: #ff9800; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-left: auto; white-space: nowrap; }
+        
+        /* 主要內容區 */
         .main-content { display: flex; flex: 1; overflow: hidden; padding: 10px; gap: 10px; }
+        
         .item-area { flex: 1.8; overflow-y: auto; background: white; border-radius: 15px; padding: 15px; border: 2px solid #e8e0d9; }
         .cat-title { background: #fdf5f0; padding: 8px 15px; border-radius: 20px; margin: 15px 0 8px; font-weight: bold; border-left: 8px solid var(--main-brown); font-size: 1.2em; }
         .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 10px; }
+        
         .p-btn { background: white; border: 1px solid #f0e6dd; border-radius: 12px; padding: 10px 5px; text-align: center; cursor: pointer; box-shadow: 2px 2px 0 #e8e0d9; min-height: 90px; display: flex; flex-direction: column; justify-content: center; }
         .p-name { font-size: 0.85em; font-weight: bold; margin-bottom: 5px; height: 2.8em; overflow: hidden; line-height: 1.4; }
         .p-price { color: #c2966d; font-size: 1.2em; font-weight: bold; }
         .p-stock { font-size: 0.8em; color: #999; }
+        
         .checkout-area { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 320px; overflow-y: auto; }
         .card { background: white; border-radius: 15px; padding: 12px; border: 2px solid #e8e0d9; }
         #cart-list { max-height: 200px; overflow-y: auto; border-bottom: 2px dashed #e8e0d9; }
@@ -32,6 +37,8 @@
         .total-display { font-size: 3.2em; font-weight: bold; color: var(--price-red); text-align: right; margin: 10px 0; }
         .pay-btn { flex: 1; padding: 15px; border-radius: 10px; border: 1px solid #ccc; background: white; cursor: pointer; font-weight: bold; font-size: 1.3em;}
         .pay-btn.active { background: var(--accent-brown); color: white; border-color: var(--accent-brown); }
+        
+        /* 彈出視窗 */
         #admin-panel, #history-panel { position: fixed; inset: 10px; background: white; z-index: 1000; border-radius: 20px; display: none; flex-direction: column; padding: 15px; border: 3px solid var(--main-brown); box-shadow: 0 0 50px rgba(0,0,0,0.3); }
         .admin-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 15px; flex: 1; overflow: hidden; }
         .add-row-top { background: #f0fdf4; padding: 15px; border: 2px solid var(--profit-green); border-radius: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
@@ -47,17 +54,36 @@
         .clear-log-btn { background: none; border: 1px solid #b0a496; color: #b0a496; font-size: 0.75em; padding: 2px 8px; border-radius: 5px; cursor: pointer; }
         .del-cat-btn { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8em; margin-left: 10px; }
         .edit-cat-btn { background: #3182ce; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8em; margin-left: 10px; }
+
+        /* ▼▼▼ 手機版專用樣式 (這裡開始是新增的修改) ▼▼▼ */
+        @media (max-width: 768px) {
+            body { overflow: auto; height: auto; }
+            .main-content { flex-direction: column; overflow: visible; height: auto; } /* 上下排列 */
+            .item-area { flex: none; height: 50vh; margin-bottom: 10px; border: 3px solid #b0a496; } /* 商品區固定高度 */
+            .checkout-area { flex: 1; min-width: 100%; } /* 結帳區 */
+            .product-grid { grid-template-columns: repeat(3, 1fr); } /* 手機強制一排3個 */
+            .p-btn { min-height: 85px; }
+            .p-name { font-size: 0.8em; }
+            .total-display { font-size: 3.5em; text-align: center; } /* 金額放大置中 */
+            
+            /* 讓底部按鈕可以換行，不被遮擋 */
+            .btn-group-bottom { flex-wrap: wrap; margin-bottom: 30px; } 
+            
+            /* 讓彈出視窗全螢幕顯示，避免跑版 */
+            #admin-panel, #history-panel { inset: 0; border-radius: 0; z-index: 2000; width: 100%; height: 100%; padding: 10px; box-sizing: border-box; }
+            .admin-layout { display: flex; flex-direction: column; }
+            .admin-table-container { max-height: 50vh; }
+        }
+        /* ▲▲▲ 手機版專用樣式 (結束) ▲▲▲ */
     </style>
 </head>
 <body>
 
-
-<header>🧸花 蓮 鼠 POS (Pro 修正版)</header>
+<header>🧸 花 蓮 鼠 POS (Pro 修正版)</header>
 <div class="nav-bar">
     <div id="navbar" style="display:flex; gap:10px;"></div>
     <button class="sync-btn" onclick="syncOfflineData()">🔄 離線數據同步</button>
 </div>
-
 
 <div class="main-content">
     <div class="item-area" id="item-area">同步中...</div>
@@ -88,7 +114,6 @@
                 <input type="date" id="manual-date" style="display:none; margin-left:10px; padding:5px; border:1px solid #ccc; border-radius:5px;">
             </div>
 
-
             <button onclick="submitOrder()" style="width:100%; padding:20px; margin-top:15px; background:var(--profit-green); color:white; border:none; border-radius:15px; font-weight:bold; font-size:1.6em;">結帳完成</button>
         </div>
         <div class="card" style="flex:1; font-size: 1em; overflow-y: auto;">
@@ -98,19 +123,17 @@
     </div>
 </div>
 
-
-<div style="padding:15px; text-align:center; display: flex; justify-content: center; gap: 15px;">
+<div class="btn-group-bottom" style="padding:15px; text-align:center; display: flex; justify-content: center; gap: 15px;">
     <button onclick="toggleAdmin()" style="padding:15px 25px; border-radius:15px; background:white; border:3px solid var(--main-brown); font-weight:bold; font-size:1.1em; cursor:pointer;">🛠️ 商品管理 / 統計</button>
     <button onclick="toggleHistory()" style="padding:15px 25px; border-radius:15px; background:var(--accent-brown); color:white; border:none; font-weight:bold; font-size:1.1em; cursor:pointer;">📜 歷史紀錄 / 退貨</button>
 </div>
-
 
 <div id="history-panel">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
         <h2 style="margin:0;">📜 歷史紀錄管理</h2>
         <button onclick="toggleHistory()" style="padding:8px 15px;">✕ 關閉</button>
     </div>
-    <div style="background:#fdf5f0; padding:15px; border-radius:10px; margin-bottom:15px; display:flex; gap:15px; align-items:center;">
+    <div style="background:#fdf5f0; padding:15px; border-radius:10px; margin-bottom:15px; display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
         <div>
             <label>單日：</label><input type="date" id="search-date" style="padding:8px;">
             <button onclick="searchHistory('day')" style="padding:8px 15px; background:var(--main-brown); color:white; border:none;">🔍 查詢</button>
@@ -123,18 +146,17 @@
     <div id="history-result-area" style="flex:1; overflow-y:auto; background:white; padding:15px; border-radius:10px; border:1px solid #eee;"></div>
 </div>
 
-
 <div id="admin-panel">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <h2 style="margin:0;">⚙️ 管理中心</h2>
-        <div style="display:flex; gap:10px;">
+        <div style="display:flex; gap:10px; overflow-x:auto;">
             <select id="admin-cat-jump" onchange="jumpToAdminCat(this.value)" style="padding:8px; border-radius:5px;">
                 <option value="">快速跳轉分類...</option>
             </select>
-            <button onclick="exportToExcel()" style="padding:8px 15px; background:#217346; color:white; border:none;">📥 匯出</button>
-            <button onclick="backupData()" style="padding:8px 15px; background:#666; color:white; border:none;">💾 備份</button>
+            <button onclick="exportToExcel()" style="padding:8px 15px; background:#217346; color:white; border:none; white-space:nowrap;">📥 匯出</button>
+            <button onclick="backupData()" style="padding:8px 15px; background:#666; color:white; border:none; white-space:nowrap;">💾 備份</button>
             <input type="file" id="import-file" style="display:none;" onchange="importData(event)">
-            <button onclick="document.getElementById('import-file').click()" style="padding:8px 15px; background:#d9534f; color:white; border:none;">⚠️ 還原</button>
+            <button onclick="document.getElementById('import-file').click()" style="padding:8px 15px; background:#d9534f; color:white; border:none; white-space:nowrap;">⚠️ 還原</button>
             <button onclick="toggleAdmin()" style="padding:8px 15px;">✕ 關閉</button>
         </div>
     </div>
@@ -148,7 +170,6 @@
         <div><label>庫存</label><input type="number" id="new-s" style="width:60px;"></div>
         <button onclick="addNewProduct()" style="background:var(--profit-green); color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">➕ 新增商品</button>
     </div>
-
 
     <div class="admin-layout">
         <div class="admin-table-container">
@@ -167,9 +188,8 @@
     </div>
 </div>
 
-
 <script>
-        const firebaseConfig = {
+    const firebaseConfig = {
         apiKey: "AIzaSyCyvVqE0f5gDMA1Pxc2wiYbJYNKQWJoDVA",
         authDomain: "hu1111-ae2ff.firebaseapp.com",
         // ▼ 這行非常重要，原本的代碼裡沒有，我幫你補上了 ▼
@@ -180,7 +200,6 @@
         appId: "1:229246062634:web:31fdec556c7347f48a3353",
         measurementId: "G-R9V6JK9CR7"
     };
-
 
     let db;
     try {
@@ -195,12 +214,10 @@
     let cart = []; 
     let currentPay = '現金';
 
-
     const defaultInv = [
         { cat: "🧸 招牌玩偶", items: [{id: "A01", n: "經典小熊", c: 100, p: 250, s: 10}] },
         { cat: "☕ 生活雜貨", items: [{id: "B01", n: "手作馬克杯", c: 50, p: 150, s: 20}] }
     ];
-
 
     function loadData() {
         if(db && firebaseConfig.apiKey !== "請替換為您的API_KEY") {
@@ -223,14 +240,12 @@
     }
     loadData();
 
-
     function syncToDB() {
         initUI();
         if(db && firebaseConfig.apiKey !== "請替換為您的API_KEY") {
             db.ref('inventory').set(inv).catch(e => console.log("雲端同步失敗"));
         }
     }
-
 
     function initUI() {
         const area = document.getElementById('item-area'), nav = document.getElementById('navbar');
@@ -260,7 +275,6 @@
         if(document.getElementById('admin-panel').style.display === 'flex') renderAdminTable();
     }
 
-
     // --- 即時紀錄功能 ---
     function updateLog() {
         const logArea = document.getElementById('order-log');
@@ -272,7 +286,6 @@
             return;
         }
 
-
         logArea.innerHTML = todayOrders.map(o => `
             <div style="border-bottom:1px solid #eee; padding:5px 0; font-size:0.9em;">
                 <span style="color:#888;">[${o.t}]</span> <b>$${o.total}</b> (${o.pay})
@@ -281,13 +294,11 @@
         `).join('');
     }
 
-
     // --- 歷史與統計功能 ---
     function searchHistory(mode) {
         const resultArea = document.getElementById('history-result-area');
         let filtered = [];
         let title = "";
-
 
         if(mode === 'day') {
             const date = document.getElementById('search-date').value;
@@ -306,10 +317,8 @@
             title = `📊 ${month} 月度統計`;
         }
 
-
         let totalRev = 0, totalProf = 0;
         let html = `<h3>${title}</h3>`;
-
 
         if(filtered.length === 0) {
             html += "<p>此時段無資料</p>";
@@ -332,7 +341,6 @@
         resultArea.innerHTML = html;
     }
 
-
     function deleteOrder(key) {
         if(!db) return alert("本地模式不支援刪除");
         if(confirm("確定要執行退貨並刪除此紀錄嗎？(注意：此動作不會自動補回庫存，需手動調整)")) {
@@ -341,7 +349,6 @@
               .catch(e => alert("刪除失敗"));
         }
     }
-
 
     function renderStatTable() {
         const stats = {};
@@ -354,7 +361,6 @@
             });
         });
 
-
         const sorted = Object.entries(stats).sort((a,b) => b[1].qty - a[1].qty);
         document.getElementById('stat-tbody').innerHTML = sorted.map(([name, data]) => `
             <tr>
@@ -364,7 +370,6 @@
             </tr>
         `).join('');
     }
-
 
     // --- 原有邏輯修正與補強 ---
     function checkNewCat(val) {
@@ -378,7 +383,6 @@
         }
     }
 
-
     function deleteCategory(ci) {
         if(confirm(`⚠️ 確定要刪除「${inv[ci].cat}」及其所有商品？`)) {
             inv.splice(ci, 1);
@@ -387,12 +391,10 @@
         }
     }
 
-
     function editCategoryName(ci) {
         const n = prompt("請修改分類名稱：", inv[ci].cat);
         if (n) { inv[ci].cat = n; syncToDB(); }
     }
-
 
     function updateCatSelect() {
         const sel = document.getElementById('select-cat');
@@ -401,7 +403,6 @@
                            `<option value="ADD">➕ 新增分類</option>`;
         }
     }
-
 
     function renderAdminTable() {
         let html = '';
@@ -427,7 +428,6 @@
         document.getElementById('admin-tbody').innerHTML = html;
     }
 
-
     function addNewProduct() {
         const catN = document.getElementById('select-cat').value;
         const id = document.getElementById('new-id').value, n = document.getElementById('new-n').value;
@@ -443,7 +443,6 @@
         }
     }
 
-
     function addCart(id) {
         let target = null;
         inv.forEach(c => (c.items || []).forEach(i => { if(i.id === id) target = i; }));
@@ -454,7 +453,6 @@
         }
     }
 
-
     function renderCart() {
         document.getElementById('cart-list').innerHTML = cart.map((it, i) => `
             <div class="cart-item"><span>${it.id} ${it.n}</span><b>$${it.p}</b>
@@ -462,26 +460,22 @@
         calc();
     }
 
-
     function calc() {
         const total = cart.reduce((a,b)=>a+b.p, 0) - Number(document.getElementById('discount').value || 0);
         document.getElementById('final-total').innerText = Math.max(0, total);
         calcChange();
     }
 
-
     function calcChange() {
         const t = Number(document.getElementById('final-total').innerText), p = Number(document.getElementById('cash-in').value || 0);
         document.getElementById('cash-change').innerText = p > t ? p - t : 0;
     }
-
 
     function setPay(m) {
         currentPay = m;
         document.getElementById('btn-cash').className = m==='現金'?'pay-btn active':'pay-btn';
         document.getElementById('btn-elec').className = m==='電支'?'pay-btn active':'pay-btn';
     }
-
 
     function submitOrder() {
         if(!cart.length) return;
@@ -525,7 +519,6 @@
         syncToDB();
     }
 
-
     function addExtraCost() {
         const amount = prompt("請輸入支出金額：");
         if (!amount || isNaN(amount)) return;
@@ -533,7 +526,6 @@
         cart.push({ id: "支出", n: "[支] " + reason, p: 0, c: Number(amount), s: 0 });
         renderCart();
     }
-
 
     function editItem(ci, ii, k, v) { inv[ci].items[ii][k] = (k==='n'?v:Number(v)); syncToDB(); }
     function move(ci, ii, dir) { 
@@ -550,7 +542,6 @@
         const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `LittleNook_Backup_${new Date().toLocaleDateString()}.json`; a.click();
     }
 
-
     function exportToExcel() {
         const data = orders.map(o => ({
             "日期": o.d, "時間": o.t, "總額": o.total, "毛利": o.profit, "支付方式": o.pay, "備註": o.note, "商品明細": o.items.map(i=>i.n).join(',')
@@ -561,7 +552,6 @@
         XLSX.writeFile(wb, `Sales_Export_${new Date().toLocaleDateString()}.xlsx`);
     }
 
-
     function syncOfflineData() {
         if(db) {
             db.ref('inventory').set(inv);
@@ -570,7 +560,4 @@
     }
 </script>
 </body>
-
 </html>
-
-
